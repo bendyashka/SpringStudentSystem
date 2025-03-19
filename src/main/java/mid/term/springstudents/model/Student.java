@@ -7,9 +7,13 @@ import java.time.LocalDate;
 import java.time.Period;
 
 
+
+
 @Data
 @Entity
 @Table(name ="students")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Student {
     @Id
     @GeneratedValue
@@ -26,3 +30,4 @@ public class Student {
         return Period.between(dateOfBirth, LocalDate.now()).getYears();
     }
 }
+
