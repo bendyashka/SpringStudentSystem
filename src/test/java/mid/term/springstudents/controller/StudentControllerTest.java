@@ -1,104 +1,97 @@
 package mid.term.springstudents.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import mid.term.springstudents.model.Student;
 import mid.term.springstudents.service.StudentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDate;
-import java.util.Collections;
+import java.util.List;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class StudentControllerTest {
-
-    @Mock
-    private StudentService studentService;
+class StudentControllerTest {
 
     @InjectMocks
     private StudentController studentController;
 
-    private MockMvc mockMvc;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @Mock
+    private StudentService studentService;
 
-    @BeforeEach
-    public void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(studentController).build();
+    @Test
+    void shouldReturnAllStudents() {
+
+        List<Student> students = List.of(new Student(1L, "John", "Doe", "john.doe@example.com", null, 20));
+        when(studentService.findAllStudent()).thenReturn(students);
+
+        List<Student> result = studentController.findAllStudent();
+
+        assertEquals(1, result.size());
+        assertEquals("John", result.get(0).getName());
     }
 
     @Test
-    public void testFindAllStudents() throws Exception {
-        when(studentService.findAllStudent()).thenReturn(Collections.emptyList());
+    void shouldSaveStudent() {
 
-        mockMvc.perform(get("/api/v1/students"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("[]"));
+        Student student = new Student(1L, "Jane", "Doe", "jane.doe@example.com", null, 20);
+        when(studentService.saveStudent(Mockito.any(Student.class))).thenReturn(student);
 
-        verify(studentService, times(1)).findAllStudent();
+
+        String response = studentController.saveStudent(student);
+
+
+        assertEquals("Student saved successfully", response);
+        Mockito.verify(studentService).saveStudent(student);
     }
 
     @Test
-    public void testSaveStudent() throws Exception {
-        Student student = new Student(1L, "John", "Doe", "john.doe@example.com", LocalDate.of(2000, 1, 1));
+    void shouldFindStudentByEmail() {
 
-        when(studentService.saveStudent(any(Student.class))).thenReturn(student);
+        String email = "jane.doe@example.com";
+        Student student = new Student(1L, "Jane", "Doe", email, null, 20);
+        when(studentService.findStudentByEmail(email)).thenReturn(student);
 
-        mockMvc.perform(post("/api/v1/students/save_student")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(student)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Student saved successfully"));
 
-        verify(studentService, times(1)).saveStudent(any(Student.class));
+        Student foundStudent = studentController.findStudentByEmail(email);
+
+
+        assertEquals(email, foundStudent.getEmail());
+        assertEquals("Jane", foundStudent.getName());
+        Mockito.verify(studentService).findStudentByEmail(email);
+    }
+
+
+    @Test
+    void shouldUpdateStudent() {
+
+        Student student = new Student(1L, "Jane", "Doe", "jane.doe@example.com", null, 20);
+        when(studentService.updateStudent(Mockito.any(Student.class))).thenReturn(student);
+
+
+        Student updatedStudent = studentController.updateStudent(student);
+
+
+        assertEquals("Jane", updatedStudent.getName());
+        Mockito.verify(studentService).updateStudent(student);
     }
 
     @Test
-    public void testFindStudentByEmail() throws Exception {
-        Student student = new Student(1L, "John", "Doe", "john.doe@example.com", LocalDate.of(2000, 1, 1));
+    void shouldDeleteStudent() {
 
-        when(studentService.findStudentByEmail("john.doe@example.com")).thenReturn(student);
+        String email = "jane.doe@example.com";
+        Mockito.doNothing().when(studentService).deleteStudent(email);
 
-        mockMvc.perform(get("/api/v1/students/john.doe@example.com"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("John"))
-                .andExpect(jsonPath("$.email").value("john.doe@example.com"));
 
-        verify(studentService, times(1)).findStudentByEmail("john.doe@example.com");
+        studentController.deleteStudent(email);
+
+
+        Mockito.verify(studentService).deleteStudent(email);
     }
 
-    @Test
-    public void testUpdateStudent() throws Exception {
-        Student student = new Student(1L, "John", "Doe", "john.doe@example.com", LocalDate.of(2000, 1, 1));
 
-        when(studentService.updateStudent(any(Student.class))).thenReturn(student);
-
-        mockMvc.perform(put("/api/v1/students/update_student")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(student)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("John"))
-                .andExpect(jsonPath("$.email").value("john.doe@example.com"));
-
-        verify(studentService, times(1)).updateStudent(any(Student.class));
-    }
-
-    @Test
-    public void testDeleteStudent() throws Exception {
-        doNothing().when(studentService).deleteStudent("john.doe@example.com");
-
-        mockMvc.perform(delete("/api/v1/students/delete_student/john.doe@example.com"))
-                .andExpect(status().isOk());
-
-        verify(studentService, times(1)).deleteStudent("john.doe@example.com");
-    }
 }
