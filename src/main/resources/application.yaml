@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/student_db
     username: root
-    password: "Dastanchik7"  # Или ${DB_PASSWORD}
+    password: "Dastanchik7"
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -14,28 +14,26 @@ spring:
         show_sql: true
         format_sql: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 845863838629-kvmvu7d0fpn512j6f9sh7q6b15v5akru.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - openid
+              - profile
+              - email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
 jwt:
-  secret: "5491a689-edec-40cd-b615-cd0fde490c11"
-  expirationMs: 3600000         # 1 час
-  refreshExpirationMs: 86400000 # 1 день
-
-  spring:
-    security:
-      oauth2:
-        client:
-          registration:
-            google:
-              client-id: ТВОЙ_GOOGLE_CLIENT_ID
-              client-secret: ТВОЙ_GOOGLE_CLIENT_SECRET
-              scope:
-                - openid
-                - profile
-                - email
-              redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-          provider:
-            google:
-              authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
-              token-uri: https://oauth2.googleapis.com/token
-              user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
-              user-name-attribute: sub
-
+  secret: "o9tB8T1zJmxQX+TWdj5w1GpE0yBr7hE6aJuM9HzG7IA="
+  expirationMs: 3600000
+  refreshExpirationMs: 86400000
