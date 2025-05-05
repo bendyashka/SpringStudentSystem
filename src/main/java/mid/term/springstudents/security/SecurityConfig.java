@@ -34,7 +34,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configure(http)) // Добавляем CORS поддержку
+                .cors(cors -> cors.configure(http))
 
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -52,6 +52,7 @@ public class SecurityConfig {
                 )
 
                 .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
                         .successHandler(oAuth2Handler)
                         .failureHandler((request, response, exception) -> {
                             logger.error("OAuth2 login failed", exception);
