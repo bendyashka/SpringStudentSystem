@@ -28,15 +28,16 @@ public class OAuth2Handler implements AuthenticationSuccessHandler {
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         try {
-            logger.info("OAuth2 authentication successful");
+            logger.info("✅ OAuth2 authentication successful");
 
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-            logger.info("OAuth2User principal class: {}", oAuth2User.getClass());
-            logger.info("OAuth2User attributes: {}", oAuth2User.getAttributes());
+
+
+            // logger.info("OAuth2User attributes: {}", oAuth2User.getAttributes());
 
             String email = oAuth2User.getAttribute("email");
             if (email == null) {
-                logger.error("Email not found in OAuth2 attributes");
+                logger.error(" Email not found in OAuth2 attributes");
                 response.sendRedirect("http://localhost:3000/login?error=email_not_provided");
                 return;
             }
@@ -45,25 +46,25 @@ public class OAuth2Handler implements AuthenticationSuccessHandler {
             User user = userOptional.orElseGet(() -> createNewUser(oAuth2User, email));
 
             String token = jwtTokenService.generateToken(user);
-            logger.info("Generated JWT token for user: {}", user.getEmail());
 
 
+            logger.info("✅ Generated JWT token: {}", token);
 
             String redirectUrl = String.format(
                     "http://localhost:3000/oauth2/success?token=%s&email=%s",
                     token,
                     user.getEmail()
             );
-            logger.info("Token: {}", token);
+            logger.info("🔁 Redirecting to: {}", redirectUrl);
 
-            logger.info("Redirecting to: {}", redirectUrl);
             response.sendRedirect(redirectUrl);
 
         } catch (Exception e) {
-            logger.error("OAuth2 processing error", e);
+            logger.error(" OAuth2 processing error", e);
             response.sendRedirect("http://localhost:3000/login?error=oauth_processing_error");
         }
     }
+
 
     private User createNewUser(OAuth2User oAuth2User, String email) {
         String name = oAuth2User.getAttribute("name");
